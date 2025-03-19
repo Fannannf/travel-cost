@@ -12,8 +12,9 @@ struct DestinationSection: View {
     @State private var tripName: String = ""
     @State private var destination: String = ""
     @State private var price: String = ""
-    @Binding var transportationType: String
-    
+    @State private var bbm: String = ""
+    @State private var distance: String = ""
+    @State private var transportationType: String = "Public"
     @State private var transportation: String = "Plane"
     @State private var accommodation: String = ""
     @State private var showAccommodation = false
@@ -103,22 +104,61 @@ struct DestinationSection: View {
                     TextField("Rp.", text: $price)
                         .multilineTextAlignment(.trailing)
                 }
+            } else {
+                VStack {
+                    HStack{
+                        Image(systemName: "fuelpump")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 18, height: 18)
+                            .padding(5)
+                            .background(Color.red.opacity(0.2))
+                            .clipShape(Circle())
+                            .foregroundColor(.red.opacity(0.8))
+                        Text("BBM")
+                        TextField("25.000", text: $bbm)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.trailing)
+                        Text("km/liter")
+                            .font(.body)
+                    }
+                    Divider()
+                    HStack{
+                        Image(systemName: "road.lanes")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 18, height: 18)
+                            .padding(5)
+                            .background(Color.red.opacity(0.2))
+                            .clipShape(Circle())
+                            .foregroundColor(.red.opacity(0.8))
+                        Text("Distance")
+                        TextField("20", text: $distance)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.trailing)
+                        Text("km")
+                            .font(.body)
+                    }
+                }
             }
             Divider()
             Group {
                 ExpandableSection(title: "Accommodation",icon: "house.fill", content: {
                     TextField("Rp.", text: $accommodation)
                         .cornerRadius(8)
+                        .keyboardType(.numberPad)
                 }, isExpanded: $showAccommodation)
                 Divider()
                 ExpandableSection(title: "Food",icon: "fork.knife", content: {
                     TextField("Rp.", text: $accommodation)
                         .cornerRadius(8)
+                        .keyboardType(.numberPad)
                 }, isExpanded: $showFood)
                 Divider()
                 ExpandableSection(title: "Entertainment",icon: "handbag.fill", content: {
                     TextField("Rp.", text: $accommodation)
                         .cornerRadius(8)
+                        .keyboardType(.numberPad)
                 }, isExpanded: $showEntertainment)
             }
         }
@@ -135,5 +175,5 @@ struct DestinationSection: View {
 }
 
 #Preview {
-    DestinationSection(numberDestination: 1, transportationType: .constant("Public"))
+    DestinationSection(numberDestination: 1)
 }

@@ -10,7 +10,6 @@ import SwiftUI
 struct HomeView: View {
     @State private var tripName: String = ""
     @State private var destinations: [Int] = [1]
-    @State private var selectedSegment: String = "Public"
     
     var body: some View {
         NavigationView {
@@ -66,7 +65,7 @@ struct HomeView: View {
                             ScrollView{
                                 VStack(spacing: 16){
                                     ForEach(destinations, id: \.self) { index in
-                                        DestinationSection(numberDestination: index,transportationType: $selectedSegment)
+                                        DestinationSection(numberDestination: index)
                                     }
                                     
                                     Button(action: {
@@ -94,37 +93,6 @@ struct HomeView: View {
         }
     }
 }
-
-//            VStack(spacing: 16) {
-//
-//                .padding()
-//                .background(Color(.orange))
-//                .cornerRadius(12)
-//                .padding(.horizontal)
-//                .shadow(color: Color("shadowColor"), radius: 6,y: 4)
-//
-                
-//
-//                Spacer()
-                
-//                Spacer()
-//            }
-//            ScrollView {
-//
-//            }
-//            .toolbar {
-//                ToolbarItem(placement: .navigationBarTrailing) {
-//                    Button(action: {
-                        
-//                    }) {
-//                        Image(systemName: "plus")
-//                    }
-//                }
-//            }
-//            .navigationTitle("Trip Estimator")
-//            .background(Color(.white))
-//            .edgesIgnoringSafeArea(.bottom)
-
 #Preview {
     HomeView()
 }
