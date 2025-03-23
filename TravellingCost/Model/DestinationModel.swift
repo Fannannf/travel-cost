@@ -7,22 +7,16 @@
 
 import Foundation
 
-struct DestinationModel {
-    var id: UUID = UUID()
-    var title: String
-    var transportation: TransportationType
-    var transportationVehicle: String
+struct DestinationModel: Identifiable {
+    var id = UUID()
+    var index: Int
+    var title: String = ""
+    var transportation: String = "Public"
+    var transportationVehicle: String?
     var bbm: Double?
     var distance: Double?
     var price: Double?
     var accommodation: Double?
     var food: Double?
     var entertainment: Double?
-}
-
-enum TransportationType: String, CaseIterable, Identifiable {
-    case `public` = "Public"
-    case `private` = "Private"
-    
-    var id: String { self.rawValue }
 }

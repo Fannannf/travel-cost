@@ -8,11 +8,12 @@
 import SwiftUI
 
 struct HomeView: View {
-    @State private var tripName: String = ""
-    @State private var destinations: [Int] = [1]
+    @StateObject private var viewModel = TripEstimateViewModel()
+    @State private var showingResult = false
+    @State private var totalCost = 0
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack{
                 Color.red.ignoresSafeArea()
                 
@@ -26,8 +27,13 @@ struct HomeView: View {
                             .font(.headline)
                         Spacer()
                         Button(action: {
-                            let newDestination = (destinations.last ?? 0) + 1
-                            destinations.append(newDestination)
+                        }, label: {
+                            Image(systemName: "clock.arrow.circlepath")
+                                .font(.title2)
+                                .foregroundColor(.white)
+                        })
+                        Button(action: {
+                            viewModel.addDestination()
                         }, label: {
                             Image(systemName: "plus")
                                 .font(.title2)
@@ -46,7 +52,7 @@ struct HomeView: View {
                                 Label("Name Trip", systemImage: "")
                                     .font(.title2.bold())
                                     .foregroundStyle(.white)
-                                TextField("Placeholder", text: $tripName)
+                                TextField("Placeholder", text: $viewModel.tripName)
                                     .padding(10)
                                     .background(Color(.white))
                                     .cornerRadius(8)
@@ -62,20 +68,21 @@ struct HomeView: View {
                             )
                             .cornerRadius(15)
                             
-                            ScrollView{
+                            ScrollView(showsIndicators: false){
                                 VStack(spacing: 16){
-                                    ForEach(destinations, id: \.self) { index in
-                                        DestinationSection(numberDestination: index)
+                                    ForEach(viewModel.destinations) { destination in
+                                        DestinationSection(viewModel: viewModel, destinationId: destination.id)
                                     }
                                     
                                     Button(action: {
-                                        print("Calculate tapped")
+                                        totalCost = viewModel.calculateTotalCost()
+                                        showingResult = true
                                     }) {
                                         Text("Calculate")
                                             .frame(maxWidth: .infinity)
                                             .font(.headline)
                                             .padding()
-                                            .background(Color(.red).opacity(0.7))
+                                            .background(Color(.red).opacity(0.8))
                                             .foregroundColor(.white)
                                             .cornerRadius(8)
                                     }
@@ -90,9 +97,29 @@ struct HomeView: View {
                 }
             }
             .ignoresSafeArea(edges: .bottom)
+            .sheet(isPresented: $showingResult) {
+                TripDetailsSheet(viewModel: viewModel)
+            }
         }
     }
 }
+
+extension View {
+    func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
+        clipShape(RoundedCorner(radius: radius, corners: corners))
+    }
+}
+
+struct RoundedCorner: Shape {
+    var radius: CGFloat = .infinity
+    var corners: UIRectCorner = .allCorners
+
+    func path(in rect: CGRect) -> Path {
+        let path = UIBezierPath(roundedRect: rect, byRoundingCorners: corners, cornerRadii: CGSize(width: radius, height: radius))
+        return Path(path.cgPath)
+    }
+}
+
 #Preview {
     HomeView()
 }

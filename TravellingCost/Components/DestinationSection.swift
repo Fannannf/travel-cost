@@ -8,40 +8,36 @@
 import SwiftUI
 
 struct DestinationSection: View {
-    var numberDestination: Int
-    @State private var tripName: String = ""
-    @State private var destination: String = ""
-    @State private var price: String = ""
-    @State private var bbm: String = ""
-    @State private var distance: String = ""
-    @State private var transportationType: String = "Public"
-    @State private var transportation: String = "Plane"
-    @State private var accommodation: String = ""
+    @ObservedObject var viewModel: TripEstimateViewModel
+    var destinationId: UUID
+    
+    private var destination: Binding<DestinationModel> {
+            Binding<DestinationModel>(
+                get: {
+                    viewModel.destinations.first(where: { $0.id == destinationId }) ?? DestinationModel(index: 0)
+                },
+                set: { newValue in
+                    viewModel.updateDestination(newValue)
+                }
+            )
+        }
+    
     @State private var showAccommodation = false
     @State private var showFood = false
     @State private var showEntertainment = false
     
     private func updateTransportation() {
-        if let firstItem = transportationCategory().first {
-            transportation = firstItem
+        let options = viewModel.transportationOptions(for: destination.wrappedValue.transportation)
+        if let firstItem = options.first, ((destination.wrappedValue.transportationVehicle?.isEmpty) != nil) {
+                destination.wrappedValue.transportationVehicle = firstItem
+                viewModel.updateDestination(destination.wrappedValue)
+            }
         }
-    }
-    
-    private func transportationCategory() -> [String] {
-        switch transportationType {
-        case "Public":
-            return ["Plane","Train","Bus","Taxi","Taxi Online"]
-        case "Private":
-            return ["Car","Motorbike"]
-        default:
-            return []
-        }
-    }
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Destination \(numberDestination)")
-                .font(.title3.bold())
+            Text("Destination \(destination.wrappedValue.index)")
+                            .font(.title3.bold())
             Divider()
             HStack {
                 Image(systemName: "mappin")
@@ -54,7 +50,7 @@ struct DestinationSection: View {
                     .foregroundColor(.red.opacity(0.8))
                 Text("Title")
                 Spacer()
-                TextField("Destination", text: $destination)
+                TextField("Destination", text: destination.title)
                     .multilineTextAlignment(.trailing)
             }
             Divider()
@@ -70,27 +66,28 @@ struct DestinationSection: View {
                 
                 Text("Transportation")
             }
-            Picker("Transportation", selection: $transportationType) {
+            Picker("Transportation", selection: destination.transportation) {
                 Text("Public").tag("Public")
                 Text("Private").tag("Private")
             }
             .pickerStyle(.segmented)
-            .onChange(of: transportationType) { _ in
-                updateTransportation()
-            }
+            .onChange(of: destination.wrappedValue.transportation) { _ in
+                            updateTransportation()
+                        }
             
             HStack {
                 Text("Vehicle")
                 Spacer()
-                Picker("TransportationType", selection: $transportation) {
-                    ForEach(transportationCategory(), id: \.self) { option in
-                        Text(option).tag(option)
-                    }
+                Picker("TransportationType", selection: destination.transportationVehicle) {
+                    ForEach(viewModel.transportationOptions(for: destination.wrappedValue.transportation), id: \.self) { option in
+                                            Text(option).tag(option)
+                                        }
                 }
+                .tint(Color(.red))
             }
             
             Divider()
-            if transportationType == "Public" {
+            if destination.wrappedValue.transportation == "Public" {
                 HStack{
                     Image(systemName: "dollarsign")
                         .resizable()
@@ -101,8 +98,10 @@ struct DestinationSection: View {
                         .clipShape(Circle())
                         .foregroundColor(.red.opacity(0.8))
                     Text("Price")
-                    TextField("Rp.", text: $price)
+                    TextField("Rp.", value: destination.price, formatter: NumberFormatter())
                         .multilineTextAlignment(.trailing)
+                        .font(.body)
+                    
                 }
             } else {
                 VStack {
@@ -116,9 +115,11 @@ struct DestinationSection: View {
                             .clipShape(Circle())
                             .foregroundColor(.red.opacity(0.8))
                         Text("BBM")
-                        TextField("25.000", text: $bbm)
+                        TextField("25.000", value: destination.bbm, formatter: NumberFormatter())
                             .keyboardType(.numberPad)
                             .multilineTextAlignment(.trailing)
+                            .font(.body)
+                        
                         Text("km/liter")
                             .font(.body)
                     }
@@ -133,9 +134,11 @@ struct DestinationSection: View {
                             .clipShape(Circle())
                             .foregroundColor(.red.opacity(0.8))
                         Text("Distance")
-                        TextField("20", text: $distance)
+                        TextField("20", value: destination.distance, formatter: NumberFormatter())
                             .keyboardType(.numberPad)
                             .multilineTextAlignment(.trailing)
+                            .font(.body)
+                        
                         Text("km")
                             .font(.body)
                     }
@@ -144,21 +147,26 @@ struct DestinationSection: View {
             Divider()
             Group {
                 ExpandableSection(title: "Accommodation",icon: "house.fill", content: {
-                    TextField("Rp.", text: $accommodation)
+                    TextField("Rp.", value: destination.accommodation, formatter: NumberFormatter())
                         .cornerRadius(8)
                         .keyboardType(.numberPad)
+                        .font(.body)
                 }, isExpanded: $showAccommodation)
                 Divider()
                 ExpandableSection(title: "Food",icon: "fork.knife", content: {
-                    TextField("Rp.", text: $accommodation)
+                    TextField("Rp.", value: destination.food, formatter: NumberFormatter())
                         .cornerRadius(8)
                         .keyboardType(.numberPad)
+                        .font(.body)
+                    
                 }, isExpanded: $showFood)
                 Divider()
                 ExpandableSection(title: "Entertainment",icon: "handbag.fill", content: {
-                    TextField("Rp.", text: $accommodation)
+                    TextField("Rp.",value: destination.entertainment, formatter: NumberFormatter())
                         .cornerRadius(8)
                         .keyboardType(.numberPad)
+                        .font(.body)
+                    
                 }, isExpanded: $showEntertainment)
             }
         }
@@ -174,6 +182,10 @@ struct DestinationSection: View {
     }
 }
 
+func calculateTotal(){
+    
+}
+
 #Preview {
-    DestinationSection(numberDestination: 1)
+    DestinationSection(viewModel: TripEstimateViewModel(), destinationId: UUID())
 }
