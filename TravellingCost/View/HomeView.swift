@@ -6,9 +6,11 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct HomeView: View {
-    @StateObject private var viewModel = TripEstimateViewModel()
+    @StateObject var viewModel = TripEstimateViewModel()
+    @Environment(\.modelContext) private var context
     @State private var showingResult = false
     @State private var totalCost = 0
     
@@ -27,11 +29,13 @@ struct HomeView: View {
                             .font(.headline)
                         Spacer()
                         Button(action: {
+                            //
                         }, label: {
                             Image(systemName: "clock.arrow.circlepath")
                                 .font(.title2)
                                 .foregroundColor(.white)
                         })
+                        
                         Button(action: {
                             viewModel.addDestination()
                         }, label: {
@@ -73,9 +77,10 @@ struct HomeView: View {
                                     ForEach(viewModel.destinations) { destination in
                                         DestinationSection(viewModel: viewModel, destinationId: destination.id)
                                     }
+                                    .padding(.top, 5)
                                     
                                     Button(action: {
-                                        totalCost = viewModel.calculateTotalCost()
+                                        viewModel.saveTrip(context: context)
                                         showingResult = true
                                     }) {
                                         Text("Calculate")
@@ -97,9 +102,6 @@ struct HomeView: View {
                 }
             }
             .ignoresSafeArea(edges: .bottom)
-            .sheet(isPresented: $showingResult) {
-                TripDetailsSheet(viewModel: viewModel)
-            }
         }
     }
 }
@@ -113,7 +115,7 @@ extension View {
 struct RoundedCorner: Shape {
     var radius: CGFloat = .infinity
     var corners: UIRectCorner = .allCorners
-
+    
     func path(in rect: CGRect) -> Path {
         let path = UIBezierPath(roundedRect: rect, byRoundingCorners: corners, cornerRadii: CGSize(width: radius, height: radius))
         return Path(path.cgPath)

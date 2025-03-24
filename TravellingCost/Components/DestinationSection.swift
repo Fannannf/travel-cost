@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct DestinationSection: View {
-    @ObservedObject var viewModel: TripEstimateViewModel
+    @StateObject var viewModel = TripEstimateViewModel()
     var destinationId: UUID
     
     private var destination: Binding<DestinationModel> {
@@ -27,12 +27,10 @@ struct DestinationSection: View {
     @State private var showEntertainment = false
     
     private func updateTransportation() {
-        let options = viewModel.transportationOptions(for: destination.wrappedValue.transportation)
-        if let firstItem = options.first, ((destination.wrappedValue.transportationVehicle?.isEmpty) != nil) {
-                destination.wrappedValue.transportationVehicle = firstItem
-                viewModel.updateDestination(destination.wrappedValue)
-            }
-        }
+        if let firstItem = viewModel.transportationOptions(for: destination.wrappedValue.transportation).first {
+            destination.wrappedValue.transportationVehicle = firstItem
+         }
+     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -71,9 +69,9 @@ struct DestinationSection: View {
                 Text("Private").tag("Private")
             }
             .pickerStyle(.segmented)
-            .onChange(of: destination.wrappedValue.transportation) { _ in
-                            updateTransportation()
-                        }
+            .onChange(of: destination.wrappedValue.transportation) { newValue in
+                updateTransportation()
+            }
             
             HStack {
                 Text("Vehicle")
@@ -180,12 +178,4 @@ struct DestinationSection: View {
             updateTransportation()
         }
     }
-}
-
-func calculateTotal(){
-    
-}
-
-#Preview {
-    DestinationSection(viewModel: TripEstimateViewModel(), destinationId: UUID())
 }

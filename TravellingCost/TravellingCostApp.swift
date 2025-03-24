@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct TravellingCostApp: App {
@@ -14,5 +15,6 @@ struct TravellingCostApp: App {
             ContentView()
                 .preferredColorScheme(.light)
         }
+        .modelContainer(for: [TripModel.self, DestinationModel.self])
     }
 }
