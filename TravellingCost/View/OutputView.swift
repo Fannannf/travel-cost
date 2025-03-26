@@ -8,26 +8,57 @@
 import SwiftUI
 
 struct OutputView: View {
+    @StateObject var viewModel = TripEstimateViewModel()
+    @Environment(\.modelContext) private var context
+    @State private var isNavigating = false
+    @Binding var showOutputView: Bool
+    @Binding var shouldResetData: Bool
+    @Binding var navigateToHistory: Bool
+    @Environment(\.dismiss) var dismiss
+    
     var body: some View {
-        ScrollView{
-            VStack {
-                Text("Total Jawa Trip")
-                    .font(.title)
-                    .padding(.top)
-                    .foregroundColor(.reddow.opacity(0.7))
-                Text("Rp. 15.000.000")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .foregroundColor(.red.opacity(0.8))
-                DestinationOutput()
-                DestinationOutput()
+        NavigationView{
+            ScrollView{
+                VStack {
+                    Text("Total \(viewModel.tripName) Trip")
+                        .font(.title.bold())
+                        .padding(.top)
+                    Text("\(viewModel.calculateTotalCost())")
+                        .font(.largeTitle.bold())
+                        .padding(.top,2)
+                    ForEach(viewModel.destinations) { destination in
+                        DestinationOutput(viewModel: viewModel, destinationId: destination.id)
+                    }
+                    .padding(.top, 5)
+                }
+                .padding()
             }
-            .padding()
+            .navigationBarTitle("Total Calculate", displayMode: .inline)
+            .navigationBarItems(
+                leading: Button(action: {
+                    self.showOutputView = false
+                }){
+                    HStack{
+                        Image(systemName: "chevron.backward")
+                        Text("Back")
+                    }.foregroundStyle(.indigo)
+                },
+                trailing: Button(action: {
+                    viewModel.saveTrip(context: context)
+                    shouldResetData = false
+                    isNavigating = true
+                    navigateToHistory = true
+                    dismiss()
+                }) {
+                    Text("Save")
+                        .foregroundStyle(.indigo)
+                })
+            .background(Color(.systemGray6))
         }
-        .background(Color(.white))
+        
     }
 }
 
 #Preview {
-    OutputView()
+    OutputView(showOutputView: .constant(true), shouldResetData: .constant(true),navigateToHistory: .constant(true))
 }

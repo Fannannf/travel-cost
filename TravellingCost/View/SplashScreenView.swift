@@ -16,7 +16,7 @@ struct SplashScreenView: View {
     var body: some View {
         ZStack{
             LinearGradient(
-                gradient: Gradient(colors: [.red.opacity(0.3), .white]),
+                gradient: Gradient(colors: [.indigo.opacity(0.3), .white]),
                     startPoint: .top,
                     endPoint: .bottom
                 )

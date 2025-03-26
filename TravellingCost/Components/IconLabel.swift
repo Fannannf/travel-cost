@@ -8,11 +8,18 @@
 import SwiftUI
 
 struct IconLabel: View {
+    let systemName: String
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        Image(systemName: systemName)
+            .resizable()
+            .scaledToFit()
+            .frame(width: 18, height: 18)
+            .padding(5)
+            .foregroundColor(.gray.opacity(0.5))
     }
 }
 
 #Preview {
-    IconLabel()
+    IconLabel(systemName: "house.fill")
 }

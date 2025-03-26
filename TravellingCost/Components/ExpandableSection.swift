@@ -29,9 +29,7 @@ struct ExpandableSection<Content: View>: View {
                         .scaledToFit()
                         .frame(width: 18, height: 18)
                         .padding(5)
-                        .background(Color.red.opacity(0.2))
-                        .clipShape(Circle())
-                        .foregroundColor(.red.opacity(0.8))
+                        .foregroundColor(.gray.opacity(0.5))
                 }
                 Text(title)
                 Spacer()

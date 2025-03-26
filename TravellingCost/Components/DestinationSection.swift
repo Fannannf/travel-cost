@@ -10,7 +10,8 @@ import SwiftUI
 struct DestinationSection: View {
     @StateObject var viewModel = TripEstimateViewModel()
     var destinationId: UUID
-    @State private var isExpanded: Bool = false
+    @State private var isExpanded: Bool = true
+    @FocusState private var isTextFieldFocused: Bool
     
     private var destination: Binding<DestinationModel> {
             Binding<DestinationModel>(
@@ -39,131 +40,117 @@ struct DestinationSection: View {
                 content: {
                     VStack(alignment: .leading, spacing: 12) {
                         Divider()
-                        
-                        // Destination Name
                         HStack {
-                            IconLabel(systemName: "mappin", color: .red)
-                            Text("Title")
-                            Spacer()
-                            TextField("Destination", text: destination.title)
-                                .multilineTextAlignment(.trailing)
-                        }
-                        Divider()
-                        
-                        // Transportation
-                        HStack {
-                            IconLabel(systemName: "car.rear.and.tire.marks", color: .red)
+                            IconLabel(systemName: "car.rear.and.tire.marks")
                             Text("Transportation")
                         }
-                        Picker("Transportation", selection: destination.transportation) {
+                        Picker("Select Transportation", selection: destination.transportation) {
                             Text("Public").tag("Public")
                             Text("Private").tag("Private")
                         }
                         .pickerStyle(.segmented)
-                        
                         Divider()
-                        
-                        // Conditional transportation details
                         if destination.wrappedValue.transportation == "Public" {
                             HStack {
-                                IconLabel(systemName: "dollarsign", color: .red)
+                                IconLabel(systemName: "dollarsign")
                                 Text("Price")
                                 Spacer()
-                                TextField("Rp.", value: destination.price, formatter: NumberFormatter())
+                                TextField("Rp.25.000", value: destination.price, formatter: NumberFormatter())
                                     .multilineTextAlignment(.trailing)
+                                    .keyboardType(.numberPad)
                                     .font(.body)
+                                    .focused($isTextFieldFocused)
                             }
                         } else {
                             VStack(spacing: 12) {
                                 HStack {
-                                    IconLabel(systemName: "fuelpump", color: .red)
-                                    Text("BBM")
+                                    IconLabel(systemName: "fuelpump")
+                                    Text("Fuel")
                                     Spacer()
-                                    TextField("25.000", value: destination.bbm, formatter: NumberFormatter())
+                                    TextField("Rp.25.000", value: destination.bbm, formatter: NumberFormatter())
                                         .keyboardType(.numberPad)
                                         .multilineTextAlignment(.trailing)
                                         .font(.body)
+                                        .focused($isTextFieldFocused)
                                     Text("km/liter")
                                         .font(.body)
                                 }
                                 Divider()
                                 HStack {
-                                    IconLabel(systemName: "road.lanes", color: .red)
+                                    IconLabel(systemName: "road.lanes")
                                     Text("Distance")
                                     Spacer()
                                     TextField("20", value: destination.distance, formatter: NumberFormatter())
                                         .keyboardType(.numberPad)
                                         .multilineTextAlignment(.trailing)
                                         .font(.body)
+                                        .focused($isTextFieldFocused)
                                     Text("km")
                                         .font(.body)
                                 }
                             }
                         }
                         Divider()
-                        
-                        // Nested Disclosure Groups
-                        DisclosureGroup {
-                            TextField("Rp.", value: destination.accommodation, formatter: NumberFormatter())
-                                .cornerRadius(8)
-                                .keyboardType(.numberPad)
-                                .font(.body)
-                                .padding(.top, 4)
-                        } label: {
-                            HStack {
-                                IconLabel(systemName: "house.fill", color: .red)
-                                Text("Accommodation")
-                                    .font(.body.bold())
-                            }
-                        }
-                        
-                        Divider()
-                        
-                        DisclosureGroup {
-                            TextField("Rp.", value: destination.food, formatter: NumberFormatter())
-                                .cornerRadius(8)
-                                .keyboardType(.numberPad)
-                                .font(.body)
-                                .padding(.top, 4)
-                        } label: {
-                            HStack {
-                                IconLabel(systemName: "fork.knife", color: .red)
-                                Text("Food")
-                                    .font(.body.bold())
-                            }
-                        }
-                        
-                        Divider()
-                        
-                        DisclosureGroup {
-                            TextField("Rp.", value: destination.entertainment, formatter: NumberFormatter())
-                                .cornerRadius(8)
-                                .keyboardType(.numberPad)
-                                .font(.body)
-                                .padding(.top, 4)
-                        } label: {
-                            HStack {
-                                IconLabel(systemName: "handbag.fill", color: .red)
-                                Text("Entertainment")
-                                    .font(.body.bold())
-                            }
+                        Group{
+                            ExpandableSection(title: "Accommodation",icon: "house.fill", content: {
+                                TextField("Rp.25.000", value: destination.accommodation, formatter: NumberFormatter())
+                                    .cornerRadius(8)
+                                    .keyboardType(.numberPad)
+                                    .font(.body)
+                                    .focused($isTextFieldFocused)
+                            }, isExpanded: $showAccommodation)
+                            Divider()
+                            ExpandableSection(title: "Food",icon: "fork.knife", content: {
+                                TextField("Rp.25.000", value: destination.food, formatter: NumberFormatter())
+                                    .cornerRadius(8)
+                                    .keyboardType(.numberPad)
+                                    .font(.body)
+                                    .focused($isTextFieldFocused)
+                                
+                            }, isExpanded: $showFood)
+                            Divider()
+                            ExpandableSection(title: "Entertainment",icon: "handbag.fill", content: {
+                                TextField("Rp.25.000",value: destination.entertainment, formatter: NumberFormatter())
+                                    .cornerRadius(8)
+                                    .keyboardType(.numberPad)
+                                    .font(.body)
+                                    .focused($isTextFieldFocused)
+                                
+                            }, isExpanded: $showEntertainment)
                         }
                     }
                     .padding(.top, 8)
                 },
                 label: {
-                    Text("Destination \(destination.wrappedValue.index)")
-                        .font(.title3.bold())
+                    TextField("Enter Destination", text: destination.title)
+                        .padding(.leading,20)
+                        .overlay(
+                                Text("*")
+                                    .foregroundColor(.red)
+                                    .font(.title),
+                                alignment: .leading
+                            )
+                        .multilineTextAlignment(.leading)
+                        .focused($isTextFieldFocused)
                 }
             )
+            .tint(.indigo)
             .font(.body.bold())
             .padding()
-            .background(.white)
+            .background(Color(.systemBackground))
             .cornerRadius(12)
-            .padding(.horizontal, 10)
-            .shadow(color: Color("shadowColor"), radius: 6, y: 5)
+            .padding(.horizontal, 5)
+            .onTapGesture {
+                if isTextFieldFocused {
+                    isTextFieldFocused = false
+                }
+            }
             .onAppear {
                 updateTransportation()
             }
         }
+}
+
+#Preview {
+    HomeView()
 }

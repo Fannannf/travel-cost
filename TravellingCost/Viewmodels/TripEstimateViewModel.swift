@@ -13,10 +13,18 @@ class TripEstimateViewModel: ObservableObject {
     var tripName: String = ""
     var destinations: [DestinationModel] = []
     
-    init() {
-           addDestination()
-       }
+    var isCalculateDisabled: Bool {
+        let isTripNameEmpty = tripName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        let isAnyDestinationEmpty = destinations.isEmpty || destinations.contains {
+            $0.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+            $0.transportation.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        }
+        return isTripNameEmpty || isAnyDestinationEmpty
+    }
     
+    init() {
+        addDestination()
+    }
     func addDestination() {
         let newIndex = destinations.isEmpty ? 1 : (destinations.last?.index ?? 0) + 1
         let newDestination = DestinationModel(index: newIndex)
@@ -44,20 +52,36 @@ class TripEstimateViewModel: ObservableObject {
     func calculateTotalCost() -> Int {
         destinations.reduce(0) { total, destination in
             var cost = 0
-            
             if destination.transportation == "Public" {
                 cost += Int(destination.price ?? 0)
             } else if let bbm = destination.bbm, let distance = destination.distance, bbm > 0 {
                 cost += Int(bbm * distance)
             }
-            
             cost += Int(destination.accommodation ?? 0)
             cost += Int(destination.food ?? 0)
             cost += Int(destination.entertainment ?? 0)
-            
-            return total + cost
+            let emergencyFund = Int(Double(cost) * 0.2)
+            return total + cost + emergencyFund
         }
     }
+    
+    func calculateCost(for destination: DestinationModel) -> Int {
+        var cost = 0
+        
+        if destination.transportation == "Public" {
+            cost += Int(destination.price ?? 0)
+        } else if let bbm = destination.bbm, let distance = destination.distance, bbm > 0 {
+            cost += Int(bbm * distance)
+        }
+        
+        cost += Int(destination.accommodation ?? 0)
+        cost += Int(destination.food ?? 0)
+        cost += Int(destination.entertainment ?? 0)
+        
+        let emergencyFund = Int(Double(cost) * 0.2)
+        return cost + emergencyFund
+    }
+    
     
     func saveTrip(context: ModelContext) {
         let newTrip = TripModel(nameTrip: tripName)
@@ -84,6 +108,15 @@ class TripEstimateViewModel: ObservableObject {
         
         do {
             try context.save()
+            print("Test save successful")
+            
+            let request = FetchDescriptor<TripModel>()
+            if let savedTrips = try? context.fetch(request) {
+                print("Verification fetch - Total Trips: \(savedTrips.count)")
+                for trip in savedTrips {
+                    print("Trip: \(trip.nameTrip), Destinations: \(trip.destination.count)")
+                }
+            }
         } catch {
             print("Test save failed: \(error.localizedDescription)")
         }

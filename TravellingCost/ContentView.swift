@@ -10,8 +10,9 @@ import SwiftData
 
 struct ContentView: View {
     var body: some View {
-        SplashScreenView()
+        HomeView()
             .modelContainer(for: [TripModel.self, DestinationModel.self])
+            .preferredColorScheme(.light)
     }
 }
 
